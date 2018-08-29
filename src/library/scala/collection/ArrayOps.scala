@@ -105,30 +105,46 @@ object ArrayOps {
   }
 
   private class ArrayIterator[A](private[this] val xs: Array[A]) extends AbstractIterator[A] {
-    private[this] var pos = 0
-    def hasNext: Boolean = pos < xs.length
-    def next(): A = try {
-      val r = xs(pos)
-      pos += 1
-      r
-    } catch { case _: ArrayIndexOutOfBoundsException => throw new NoSuchElementException }
+    private var index = 0
+    private val end = xs.length - 1
+
+    def hasNext: Boolean = index < end
+
+    def next(): A = {
+      if (index >= end) {
+        throw new NoSuchElementException
+      }
+
+      val x = xs(index)
+      index += 1
+      x
+    }
   }
 
   private class ReverseIterator[A](private[this] val xs: Array[A]) extends AbstractIterator[A] {
-    private[this] var pos = xs.length-1
+    private[this] var pos = xs.length - 1
+
     def hasNext: Boolean = pos >= 0
-    def next(): A = try {
+
+    def next(): A = {
+      if (pos < 0) {
+        throw new NoSuchElementException
+      }
       val r = xs(pos)
       pos -= 1
       r
-    } catch { case _: ArrayIndexOutOfBoundsException => throw new NoSuchElementException }
+    }
   }
 
   private class GroupedIterator[A](xs: Array[A], groupSize: Int) extends AbstractIterator[Array[A]] {
     private[this] var pos = 0
+
     def hasNext: Boolean = pos < xs.length
+
     def next(): Array[A] = {
-      if(pos >= xs.length) throw new NoSuchElementException
+      if(pos >= xs.length) {
+        throw new NoSuchElementException
+      }
       val r = new ArrayOps(xs).slice(pos, pos+groupSize)
       pos += groupSize
       r
